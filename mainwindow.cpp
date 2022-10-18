@@ -61,6 +61,6 @@ void MainWindow::on_addBtn_clicked(){
         items.append(new QStandardItem(QDir(filePath).dirName()));
         items.append(new QStandardItem(filePath));
         m_playlistModel->appendRow(items);
-        m_playlist->addMedia(QUrl(filePath));
+        m_playlist->addMedia(QUrl("file://" + filePath));
     }
 };
