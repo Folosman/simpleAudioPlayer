@@ -10,7 +10,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-//    QVBoxLayout *vbox = new QVBoxLayout(this);
     QTableView *playlistView = new QTableView();
     m_playlistModel = new QStandardItemModel(this);
     ui->playlistView->setModel(m_playlistModel);
@@ -18,11 +17,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /*     Playlist table setting   */
     ui->playlistView->hideColumn(1);
-//    playlistView->verticalHeader()->setVisible(false);
     ui->playlistView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->playlistView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->playlistView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-//    playlistView->horizontalHeader()
 
     m_player = new QMediaPlayer(this);
     m_playlist = new QMediaPlaylist(m_player);
