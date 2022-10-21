@@ -9,12 +9,15 @@
 #include <QUrl>
 #include <QGraphicsDropShadowEffect>
 
+#include <QFile>
+#include <QTextStream>
+#include <QFileInfo>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
 //    this->setAttribute(Qt::WA_TranslucentBackground);
     this->setStyleSheet(Style::backgroundStyle());
 
@@ -43,7 +46,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->playlistView->setModel(m_playlistModel);
 
     /*     Playlist table setting   */
-    ui->playlistView->hideColumn(1);
+    ui->playlistView->hideColumn(1);//                                      this doesn't work
+    ui->playlistView->verticalHeader()->setVisible(false);
+    ui->playlistView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->playlistView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->playlistView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->playlistView->horizontalHeader()->setStretchLastSection(true);
+
+
+    /*      Playlist list setting   */
+    ui->playlistList->hideColumn(1);
     ui->playlistView->verticalHeader()->setVisible(false);
     ui->playlistView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->playlistView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -56,7 +68,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_player->setVolume(40);
     m_playlist->setPlaybackMode(QMediaPlaylist::Loop);
 
-
     connect(ui->backBtn, &QPushButton::clicked, m_playlist, &QMediaPlaylist::previous);
     connect(ui->skipBtn, &QPushButton::clicked, m_playlist, &QMediaPlaylist::next);
     connect(ui->playBtn, &QPushButton::clicked, m_player, &QMediaPlayer::play);
@@ -66,6 +77,26 @@ MainWindow::MainWindow(QWidget *parent) :
     /* DoubleClicked set current track*/
 
     connect(playlistView, &QTableView::doubleClicked, [this](const QModelIndex &index){m_playlist->setCurrentIndex(index.row());});
+
+
+    QFile file("../SimpleAudioPlayer/conf.txt");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QString item;
+        while(!file.atEnd())
+        {
+            QList <QStandardItem *> items;
+            item = file.readLine();
+            item.resize(item.size()-1);
+            items.append(new QStandardItem(QDir(item).dirName()));
+            items.append(new QStandardItem(item));
+            m_playlistModel->appendRow(items);
+            m_playlist->addMedia(QUrl::fromLocalFile(item));
+        }
+    }
+
+
+
 
 }
 
@@ -89,4 +120,20 @@ void MainWindow::on_addBtn_clicked(){
         m_playlistModel->appendRow(items);
         m_playlist->addMedia(QUrl("file://" + filePath));
     }
-};
+}
+
+void MainWindow::on_addNewPlaylist_clicked()
+{
+    QFile file("../SimpleAudioPlayer/conf.txt");
+    if (!file.open(QIODevice::Append | QIODevice::Text))
+    {
+        QDir::setCurrent("../SimpleAudioPlayer");
+        file.setFileName("conf.txt");
+    }
+
+    QString audioName = QFileDialog::getOpenFileName(this, "open", "../", "mp3(*.mp3)");
+
+    QTextStream out(&file);
+    out << audioName.toUtf8() << "\n";
+    file.close();
+}
