@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QUrl>
 #include <QGraphicsDropShadowEffect>
+#include <QSlider>
 
 #include <QFile>
 #include <QTextStream>
@@ -54,18 +55,39 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->playlistView->horizontalHeader()->setStretchLastSection(true);
 
 
-    /*      Playlist list setting   */
-    ui->playlistList->hideColumn(1);
-    ui->playlistView->verticalHeader()->setVisible(false);
-    ui->playlistView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->playlistView->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->playlistView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->playlistView->horizontalHeader()->setStretchLastSection(true);
+
+
+
+    QTableView *playlistList = new QTableView();
+    m_playlistListModel = new QStandardItemModel(this);
+    ui->playlistList->setModel(m_playlistListModel);
+
+    /*     Playlist table setting   */
+    ui->playlistList->hideColumn(1);//                                      this doesn't work
+    ui->playlistList->verticalHeader()->setVisible(false);
+    ui->playlistList->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->playlistList->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->playlistList->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->playlistList->horizontalHeader()->setStretchLastSection(true);
+
+
+
+
 
     m_player = new QMediaPlayer(this);
     m_playlist = new QMediaPlaylist(m_player);
     m_player->setPlaylist(m_playlist);
-    m_player->setVolume(40);
+
+
+
+    /*      Volume Slider setting       */
+    QSlider *volumeSlider = new QSlider(this);
+    volumeSlider->setRange(0, 100);
+    volumeSlider->setFixedWidth(100);
+    volumeSlider->setValue(100);
+
+
+
     m_playlist->setPlaybackMode(QMediaPlaylist::Loop);
 
     connect(ui->backBtn, &QPushButton::clicked, m_playlist, &QMediaPlaylist::previous);
@@ -94,10 +116,6 @@ MainWindow::MainWindow(QWidget *parent) :
             m_playlist->addMedia(QUrl::fromLocalFile(item));
         }
     }
-
-
-
-
 }
 
 
@@ -108,6 +126,7 @@ MainWindow::~MainWindow()
     delete m_playlistModel;
     delete m_playlist;
     delete m_player;
+    delete m_playlistListModel;
 }
 
 void MainWindow::on_addBtn_clicked(){
@@ -124,16 +143,16 @@ void MainWindow::on_addBtn_clicked(){
 
 void MainWindow::on_addNewPlaylist_clicked()
 {
-    QFile file("../SimpleAudioPlayer/conf.txt");
-    if (!file.open(QIODevice::Append | QIODevice::Text))
+    QDir file;
+    if(!file.cd("../SimpleAudioPlayer/Music/playlist"))
     {
-        QDir::setCurrent("../SimpleAudioPlayer");
-        file.setFileName("conf.txt");
-    }
+        file.mkdir("../SimpleAudioPlayer/Music/playlist");
+    };
 
-    QString audioName = QFileDialog::getOpenFileName(this, "open", "../", "mp3(*.mp3)");
+}
 
-    QTextStream out(&file);
-    out << audioName.toUtf8() << "\n";
-    file.close();
+void MainWindow::on_clearBtn_clicked()
+{
+    m_playlist->clear();
+    m_playlistModel->clear();
 }
