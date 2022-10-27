@@ -81,10 +81,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     /*      Volume Slider setting       */
-    QSlider *volumeSlider = new QSlider(this);
-    volumeSlider->setRange(0, 100);
-    volumeSlider->setFixedWidth(100);
-    volumeSlider->setValue(100);
+    ui->volumeSlider->setRange(0, 100);
+    ui->volumeSlider->setFixedWidth(100);
+    ui->volumeSlider->setValue(100);
 
 
 
@@ -96,6 +95,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pauseBtn, &QPushButton::clicked, m_player, &QMediaPlayer::pause);
     connect(ui->stopBtn, &QPushButton::clicked, m_player, &QMediaPlayer::stop);
 
+    connect(ui->volumeSlider, SIGNAL(valueChanged(int)), this, SIGNAL(volumeChanged(int)));
+    connect(ui->volumeSlider, SIGNAL(valueChanged(int)), m_player, SLOT(setVolume(int)));
     /* DoubleClicked set current track*/
 
     connect(playlistView, &QTableView::doubleClicked, [this](const QModelIndex &index){m_playlist->setCurrentIndex(index.row());});
