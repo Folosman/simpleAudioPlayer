@@ -23,8 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setStyleSheet(Style::backgroundStyle());
 
     QGraphicsDropShadowEffect *shadowEffect = new QGraphicsDropShadowEffect(this);
-    shadowEffect->setBlurRadius(9);
-    shadowEffect->setOffset(0);
+    shadowEffect->setBlurRadius(15);
+    shadowEffect->setOffset(5);
     shadowEffect->setColor("Red");
     ui->centralwidget->setGraphicsEffect(shadowEffect);
     ui->centralwidget->layout()->setMargin(0);
@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     /*     Playlist table setting   */
     ui->playlistView->hideColumn(1);//                                      this doesn't work
     ui->playlistView->verticalHeader()->setVisible(false);
+    ui->playlistView->horizontalHeader()->setVisible(false);
     ui->playlistView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->playlistView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->playlistView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -62,9 +63,10 @@ MainWindow::MainWindow(QWidget *parent) :
     m_playlistListModel = new QStandardItemModel(this);
     ui->playlistList->setModel(m_playlistListModel);
 
-    /*     Playlist table setting   */
+    /*     Playlist palylist list setting   */
     ui->playlistList->hideColumn(1);//                                      this doesn't work
     ui->playlistList->verticalHeader()->setVisible(false);
+    ui->playlistList->horizontalHeader()->setVisible(false);
     ui->playlistList->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->playlistList->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->playlistList->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -82,8 +84,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /*      Volume Slider setting       */
     ui->volumeSlider->setRange(0, 100);
-    ui->volumeSlider->setFixedWidth(100);
-    ui->volumeSlider->setValue(100);
+    ui->volumeSlider->setValue(40);
 
 
 
@@ -112,7 +113,6 @@ MainWindow::MainWindow(QWidget *parent) :
             item = file.readLine();
             item.resize(item.size()-1);
             items.append(new QStandardItem(QDir(item).dirName()));
-            items.append(new QStandardItem(item));
             m_playlistModel->appendRow(items);
             m_playlist->addMedia(QUrl::fromLocalFile(item));
         }
@@ -136,7 +136,6 @@ void MainWindow::on_addBtn_clicked(){
     foreach (QString filePath, files) {
         QList <QStandardItem *> items;
         items.append(new QStandardItem(QDir(filePath).dirName()));
-        items.append(new QStandardItem(filePath));
         m_playlistModel->appendRow(items);
         m_playlist->addMedia(QUrl("file://" + filePath));
     }
@@ -144,12 +143,15 @@ void MainWindow::on_addBtn_clicked(){
 
 void MainWindow::on_addNewPlaylist_clicked()
 {
-    QDir file;
-    if(!file.cd("../SimpleAudioPlayer/Music/playlist"))
+    QDir fileDir;
+    if(!fileDir.cd("../SimpleAudioPlayer/Music/playlist"))
     {
-        file.mkdir("../SimpleAudioPlayer/Music/playlist");
+        fileDir.mkdir("../SimpleAudioPlayer/Music/playlist");
     };
 
+     QList <QStandardItem *> items;
+     items.append(new QStandardItem(fileDir.dirName()));
+     m_playlistListModel->appendRow(items);
 }
 
 void MainWindow::on_clearBtn_clicked()
