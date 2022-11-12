@@ -96,14 +96,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pauseBtn, &QPushButton::clicked, m_player, &QMediaPlayer::pause);
     connect(ui->stopBtn, &QPushButton::clicked, m_player, &QMediaPlayer::stop);
 
+    connect(ui->addBtn, &QPushButton::clicked, this, &MainWindow::addBtn);
+    connect(ui->addNewPlaylist, &QPushButton::clicked, this, &MainWindow::addNewPlaylist);
+    connect(ui->clearBtn, &QPushButton::clicked, this, &MainWindow::clearBtn);
+    connect(ui->editBtn, &QPushButton::clicked, this, &MainWindow::editBtn);
+
     connect(ui->volumeSlider, SIGNAL(valueChanged(int)), this, SIGNAL(volumeChanged(int)));
     connect(ui->volumeSlider, SIGNAL(valueChanged(int)), m_player, SLOT(setVolume(int)));
     /* DoubleClicked set current track*/
 
     connect(playlistView, &QTableView::doubleClicked, [this](const QModelIndex &index){m_playlist->setCurrentIndex(index.row());});
 
-
-    QFile file("../SimpleAudioPlayer/conf.txt");
+    QFile file("../SimpleAudioPlayer/Music/playlist/conf.txt");
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QString item;
@@ -130,7 +134,7 @@ MainWindow::~MainWindow()
     delete m_playlistListModel;
 }
 
-void MainWindow::on_addBtn_clicked(){
+void MainWindow::addBtn(){
     QStringList files = QFileDialog::getOpenFileNames(this, tr("Open Files"), QString(), tr("Audio Files (*.mp3)"));
 
     foreach (QString filePath, files) {
@@ -141,21 +145,28 @@ void MainWindow::on_addBtn_clicked(){
     }
 }
 
-void MainWindow::on_addNewPlaylist_clicked()
+void MainWindow::addNewPlaylist()
 {
     QDir fileDir;
     if(!fileDir.cd("../SimpleAudioPlayer/Music/playlist"))
     {
         fileDir.mkdir("../SimpleAudioPlayer/Music/playlist");
+    }
+    else
+    {
+        QList <QStandardItem *> items;
+        items.append(new QStandardItem(fileDir.dirName()));
+        m_playlistListModel->appendRow(items);
     };
-
-     QList <QStandardItem *> items;
-     items.append(new QStandardItem(fileDir.dirName()));
-     m_playlistListModel->appendRow(items);
 }
 
-void MainWindow::on_clearBtn_clicked()
+void MainWindow::clearBtn()
 {
     m_playlist->clear();
     m_playlistModel->clear();
+}
+
+void MainWindow::editBtn()
+{
+    m_editPlaylist.show();
 }
